@@ -149,5 +149,13 @@ module ControlUnit(
 				endcase
 			end
 		
+		assign PCSrc = RCSrc_R;
+		assign MemtoReg = MemtoReg_R;
+		assign MemWrite = MemWrite_R;
+		assign ALUControl = ALUControl_R;
+		assign ALUSrc = ALUSrc_R;
+		assign ImmSrc = ImmSrc_R;
+		assign RegWirte = RegWirte_R;
+		assign RegSrc = RegSrc_R;
 	end
 endmodule
