@@ -14,4 +14,13 @@ module armreduced(
 	assign be = 4'b1111; // default
 	assign memread = 'b1; // default
 	
+	RegisterFile registerfile();
+	ALU alu();
+	ContolUnit controlunit();
+	Extend extend();
+	
+	always@(posedge clk && negedge reset) begin
+		
+	end
+	
 endmodule

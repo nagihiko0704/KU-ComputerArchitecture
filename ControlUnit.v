@@ -50,7 +50,7 @@ module ControlUnit(
 										ALUControl_R <= 1'b0;
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
-										RegWirte_R <= 1'b0;
+										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 									end
 								4'b0010: //SUB
@@ -61,7 +61,7 @@ module ControlUnit(
 										ALUControl_R <= 1'b1;
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
-										RegWirte_R <= 1'b0;
+										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 										end
 								4'b1101: //MOV
@@ -72,7 +72,7 @@ module ControlUnit(
 										ALUControl_R <= 1'b0;
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
-										RegWirte_R <= 1'b0;
+										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 									end
 								4'b1010: //CMP
@@ -83,7 +83,7 @@ module ControlUnit(
 										ALUControl_R <= 1'b1;
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
-										RegWirte_R <= 1'b0;
+										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 									end
 								default:
@@ -98,8 +98,8 @@ module ControlUnit(
 										MemtoReg_R <= 1'bx;
 										MemWrite_R <= 1'b1;
 										ALUControl_R <= (Instr[23] == 0 ? 1'b1 : 1'b0);
-										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
-										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b10);
+										ALUSrc_R <= (Instr[25] == 1 ? 1'b0 : 1'b1);
+										ImmSrc_R <= (Instr[25] == 1 ? 2'b00 : 2'b10);
 										RegWirte_R <= 1'b0;
 										RegSrc_R <= 1'b0;
 									end
@@ -109,8 +109,8 @@ module ControlUnit(
 										MemtoReg_R <= 1'b1;
 										MemWrite_R <= 1'b0;
 										ALUControl_R <= (Instr[23] == 0 ? 1'b1 : 1'b0);
-										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
-										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b10);
+										ALUSrc_R <= (Instr[25] == 1 ? 1'b0 : 1'b1);
+										ImmSrc_R <= (Instr[25] == 1 ? 2'b00 : 2'b10);
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 									end
