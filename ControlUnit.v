@@ -4,7 +4,7 @@ module ControlUnit(
 	);
 	
 	input [31:0] Instr;
-	input Flags
+	input Flags;
 	
 	output PCSrc;
 	output MemtoReg;
@@ -15,13 +15,13 @@ module ControlUnit(
 	output RegWrite;
 	output RegSrc;
 	
-	reg [3:0] Cond = Instr[31:28];
-	reg [1:0] Op = 	Instr[27:26];
-	reg [5:0] Funct = Instr[25:20];
-	reg [3:0] Rd = Instr[15:12] ;
-	reg Zbit = Flags;
+	reg [3:0] Cond;
+	reg [1:0] Op;
+	reg [5:0] Funct;
+	reg [3:0] Rd;
+	reg Zbit;
 	
-	reg [3:0] OpCode = Instr[24:21]; 
+	reg [3:0] OpCode; 
 	
 	reg PCSrc_R;
 	reg MemtoReg_R;
@@ -34,6 +34,15 @@ module ControlUnit(
 
 	
 	always@(*) begin
+	
+		Cond <= Instr[31:28];
+		Op <= Instr[27:26];
+		Funct <= Instr[25:20];
+		Rd <= Instr[15:12] ;
+		Zbit <= Flags;
+		
+		OpCode <= Instr[24:21];
+		
 		if (Cond == 4'b1110
 			|| (Cond == 4'b0000 && Zbit == 1'b1)
 			|| (Cond == 4'b0001 && Zbit == 1'b0))
@@ -86,7 +95,7 @@ module ControlUnit(
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 									end
-								default:
+								default:; //do nothing
 							endcase
 						end
 					2'b01: //LDR, STR
@@ -114,7 +123,7 @@ module ControlUnit(
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
 									end
-								default: //do nothing
+								default:; //do nothing
 							endcase
 						end
 					2'b10: //B, BL
@@ -142,20 +151,20 @@ module ControlUnit(
 										RegWirte_R <= 1'b0;
 										RegSrc_R <= 1'b1;
 									end
-								default: //do nothing
+								default:; //do nothing
 							endcase
 						end
-					default: //do nothing
+					default:; //do nothing
 				endcase
 			end
-		
-		assign PCSrc = RCSrc_R;
-		assign MemtoReg = MemtoReg_R;
-		assign MemWrite = MemWrite_R;
-		assign ALUControl = ALUControl_R;
-		assign ALUSrc = ALUSrc_R;
-		assign ImmSrc = ImmSrc_R;
-		assign RegWirte = RegWirte_R;
-		assign RegSrc = RegSrc_R;
 	end
+	
+	assign PCSrc = PCSrc_R;
+	assign MemtoReg = MemtoReg_R;
+	assign MemWrite = MemWrite_R;
+	assign ALUControl = ALUControl_R;
+	assign ALUSrc = ALUSrc_R;
+	assign ImmSrc = ImmSrc_R;
+	assign RegWrite = RegWirte_R;
+	assign RegSrc = RegSrc_R;
 endmodule

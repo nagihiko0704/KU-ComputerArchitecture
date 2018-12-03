@@ -16,10 +16,10 @@ module armreduced(
 	
 	RegisterFile registerfile();
 	ALU alu();
-	ContolUnit controlunit();
+	ControlUnit controlunit();
 	Extend extend();
 	
-	always@(posedge clk && negedge reset) begin
+	always@(posedge clk or negedge reset) begin
 		
 	end
 	

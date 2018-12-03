@@ -26,12 +26,12 @@ module ALU(
 			32'b0:
 				flag <= 1'b1;
 			default:
-				flag <= 0'b1;
+				flag <= 1'b0;
 		endcase
-		
-		assign ALUResult = result;
-		assign ALUFlags = flag;
 	end
+	
+	assign ALUResult = result;
+	assign ALUFlags = flag;
 	
 endmodule
 		
