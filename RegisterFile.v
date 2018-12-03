@@ -4,7 +4,7 @@ module RegisterFile(
 	);
 	
 	input CLK;
-	input [31:0] WE3;
+	input WE3;
 	input [3:0] RA1;
 	input [3:0] RA2;
 	input [3:0] RA3;
@@ -21,17 +21,23 @@ module RegisterFile(
 	reg [31:0] A2;
 	reg [31:0] A3;
 	
-	reg [3:0] RD1_R;
-	reg [3:0] RD2_R;
-	reg [3:0] RD3_R;
-	
 	always@(posedge CLK) begin
-		
-		
+		A1 <= register[RA1];
+		A2 <= register[RA2];
+		A3 <= register[RA3];
 	end
 	
+	assign RD1 = A1;
+	assign RD2 = A2;
+	assign RD3 = A3;
+	
 	always@(negedge CLK) begin
-		register[A3_R] <= WD3;
+		if(WE3 == 1'b1)
+			begin
+				register[A3] <= WD3;
+			end
+			
+		register[15] <= R15;
 	end
 	
 endmodule
