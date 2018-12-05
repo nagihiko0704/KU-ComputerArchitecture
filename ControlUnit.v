@@ -1,5 +1,5 @@
 module ControlUnit(
-	PCSrc,MemtoReg,MemWrite,ALUControl,ALUSrc,ImmSrc,RegWrite,RegSrc,
+	PCSrc,MemtoReg,MemWrite,ALUControl,ALUSrc,ImmSrc,RegWrite,RegSrc,InstrCode,
 	Instr, Flags
 	);
 	
@@ -14,6 +14,7 @@ module ControlUnit(
 	output [1:0] ImmSrc;
 	output RegWrite;
 	output RegSrc;
+	output [2:0] InstrCode;
 	
 	reg [3:0] Cond;
 	reg [1:0] Op;
@@ -31,6 +32,7 @@ module ControlUnit(
 	reg [1:0] ImmSrc_R;
 	reg RegWirte_R;
 	reg RegSrc_R;
+	reg [2:0] InstrCode_R; //ADD 000 SUB 001 MOV 010 CMP 011 STR 100 LDR 101 B 110 BL 111
 
 	
 	always@(*) begin
@@ -61,6 +63,7 @@ module ControlUnit(
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
+										InstrCode_R <= 3'b000;
 									end
 								4'b0010: //SUB
 									begin
@@ -72,6 +75,7 @@ module ControlUnit(
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
+										InstrCode_R <= 3'b001;
 										end
 								4'b1101: //MOV
 									begin
@@ -83,6 +87,7 @@ module ControlUnit(
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
+										InstrCode_R <= 3'b010;
 									end
 								4'b1010: //CMP
 									begin
@@ -94,6 +99,7 @@ module ControlUnit(
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
+										InstrCode_R <= 3'b011;
 									end
 								default:; //do nothing
 							endcase
@@ -111,6 +117,7 @@ module ControlUnit(
 										ImmSrc_R <= (Instr[25] == 1 ? 2'b00 : 2'b10);
 										RegWirte_R <= 1'b0;
 										RegSrc_R <= 1'b0;
+										InstrCode_R <= 3'b100;
 									end
 								1'b1: //LDR
 									begin
@@ -122,6 +129,7 @@ module ControlUnit(
 										ImmSrc_R <= (Instr[25] == 1 ? 2'b00 : 2'b10);
 										RegWirte_R <= 1'b1;
 										RegSrc_R <= 1'b0;
+										InstrCode_R <= 3'b101;
 									end
 								default:; //do nothing
 							endcase
@@ -139,6 +147,7 @@ module ControlUnit(
 										ImmSrc_R <= 2'b11;
 										RegWirte_R <= 1'b0;
 										RegSrc_R <= 1'b1;
+										InstrCode_R <= 3'b110;
 									end
 								1'b1: //BL
 									begin
@@ -150,6 +159,7 @@ module ControlUnit(
 										ImmSrc_R <= 2'b11;
 										RegWirte_R <= 1'b0;
 										RegSrc_R <= 1'b1;
+										InstrCode_R <= 3'b111;
 									end
 								default:; //do nothing
 							endcase
@@ -167,4 +177,5 @@ module ControlUnit(
 	assign ImmSrc = ImmSrc_R;
 	assign RegWrite = RegWirte_R;
 	assign RegSrc = RegSrc_R;
+	assign InstrCode = InstrCode_R;
 endmodule
