@@ -35,9 +35,9 @@ module armreduced(
 	reg [31:0] PC_R;
 	
 	wire [31:0] PCPlus4 = PC_R + 4;
-	wire [31:0] PCPlus8 = PCPlus4 + 4; 
+	wire [31:0] PCPlus8 = PC_R + 8; 
 
-	
+	assign pc = PC_R;
 	
 	ControlUnit cu (.PCSrc(PCSrc), .MemtoReg(MemtoReg), .MemWrite(MemWrite), .ALUControl(ALUControl), 
 					.ALUSrc(ALUSrc), .ImmSrc(ImmSrc), .RegWrite(RegWrite), .RegSrc(RegSrc), .InstrCode(InstrCode),
@@ -75,7 +75,7 @@ module armreduced(
 						Flag_R <= ALUFlags;
 					end
 				
-				PC_R <= (PCSrc == 1 ? PCPlus4 : Result);
+				PC_R <= (PCSrc == 0 ? PCPlus4 : Result);
 			end
 	end
 	

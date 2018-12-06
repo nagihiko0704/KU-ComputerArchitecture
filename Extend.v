@@ -19,11 +19,11 @@ module Extend(
 				end
 			2'b10: //LDR/STR type
 				begin
-					ExtImm = {{6{1'b0}} ,Instr[11:0]};
+					ExtImm = {{20{1'b0}} ,Instr[11:0]};
 				end
 			2'b11: //branch type
 				begin
-					ExtImm = {{20{Instr[23]}}, Instr[23:0], 2'b00};
+					ExtImm = {{6{Instr[23]}}, Instr[23:0], 2'b00};
 				end
 			default:
 				ExtImm = {{6{Instr[23]}}, Instr[23:0], 2'b00}; //no action

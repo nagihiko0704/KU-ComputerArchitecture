@@ -23,6 +23,7 @@ module RegisterFile(
 		if(WE3)
 			begin
 				register[A3] <= WD3;
+				
 			end
 	end
 endmodule

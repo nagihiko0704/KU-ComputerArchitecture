@@ -18,6 +18,7 @@ module ALU(
 				
 					if(InstrCode == 3'b010) //MOV
 						ALUResult = ScrB;
+						
 				end
 			1'b1: //SUB
 				ALUResult = ScrA - ScrB;
