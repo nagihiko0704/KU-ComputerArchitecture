@@ -7,37 +7,30 @@ module ALU(
 	input ALUControl;
 	input [2:0] InstrCode;
 	
-	output [31:0] ALUResult;
-	output ALUFlags;
-	
-	reg [31:0] result;
-	reg flag;
+	output reg [31:0] ALUResult;
+	output reg ALUFlags;
 	
 	always@ (*) begin
 		case(ALUControl)
 			1'b0: //ADD
 				begin
-					result = ScrA + ScrB;
+					ALUResult = ScrA + ScrB;
 				
 					if(InstrCode == 3'b010) //MOV
-						result = ScrB;
+						ALUResult = ScrB;
 				end
 			1'b1: //SUB
-				result = ScrA - ScrB;
+				ALUResult = ScrA - ScrB;
 			default: //default is always needed in case statement
-				result = 31'b0;
+				ALUResult <= 31'b0;
 		endcase
 		
-		case(result)
+		case(ALUResult)
 			32'b0:
-				flag <= 1'b1;
+				ALUFlags = 1'b1;
 			default:
-				flag <= 1'b0;
+				ALUFlags = 1'b0;
 		endcase
 	end
-	
-	assign ALUResult = result;
-	assign ALUFlags = flag;
-	
 endmodule
 		

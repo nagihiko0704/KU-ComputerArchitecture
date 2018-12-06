@@ -14,106 +14,69 @@ module armreduced(
 	assign be = 4'b1111; // default
 	assign memread = 'b1; // default
 	
-	wire PCSrc;
-	wire MemtoReg;
-	wire ALUControl;
-	wire ALUSrc;
-	wire [1:0] ImmSrc;
-	wire RegWrite;
-	wire RegSrc;
-	wire ALUFlags;
 	wire [31:0] SrcA;
-	wire [31:0] SrcB;
-	wire [31:0] ALUResult;
-	//wire [31:0] result;
-	wire [31:0] WriteData;
+	wire [31:0] D2;
 	wire [31:0] ExtImm;
-	wire [31:0] Instr;
+	wire RegSrc;
+	wire [1:0] ImmSrc;
+	wire MemWrite;
+	wire [31:0] SrcB;
+	wire ALUSrc; 
+	wire ALUControl;
+	wire ALUFlags;
+	wire RegWrite;
+	wire MemtoReg;
+	wire PCSrc;
+	wire [31:0] Result;
+	wire [31:0] ALUResult;
 	wire [2:0] InstrCode;
 	
-	reg [31:0] PC;
-	reg [31:0] PCPlus4;
-	reg [31:0] PCPlus8;
-	reg [3:0] A1_R;
-	reg [3:0] A2_R;
-	reg [3:0] A3_R;
-	reg [31:0] SrcB_R;
-	reg [31:0] result_R;
-	reg [31:0] ALUResult_R;
-	reg [31:0] readdata_R;
+	reg Flag_R = 1'b0;
+	reg [31:0] PC_R;
 	
+	wire [31:0] PCPlus4 = PC_R + 4;
+	wire [31:0] PCPlus8 = PCPlus4 + 4; 
 
 	
-	RegisterFile registerfile(.CLK(clk), .WE3(RegWrite) ,.RA1(A1_R), .RA2(A2_R), .RA3(A3_R), .WD3(readdata), .R15(PCPlus8), .RD1(SrcA), .RD2(SrcB), .RD3(writedata), .InstrCode(InstrCode));
-	ALU alu(.ALUResult(ALUResult), .ALUFlags(ALUFlags), .ScrA(SrcA), .ScrB(SrcB_R), .ALUControl(ALUControl), .InstrCode(InstrCode));
-	ControlUnit controlunit(.Instr(inst), .Flags(ALUFlags), .PCSrc(PCSrc), .MemtoReg(MemtoReg), .MemWrite(memwrite), .ALUControl(ALUControl), .ALUSrc(ALUSrc), .ImmSrc(ImmSrc), .RegWrite(RegWrite), .RegSrc(RegSrc), .InstrCode(InstrCode));
-	Extend extend(.ExtImm(ExtImm), .Instr(inst), .ImmSrc(ImmSrc));
 	
-	assign memaddr = ALUResult_R;
-	assign pc = PC;
+	ControlUnit cu (.PCSrc(PCSrc), .MemtoReg(MemtoReg), .MemWrite(MemWrite), .ALUControl(ALUControl), 
+					.ALUSrc(ALUSrc), .ImmSrc(ImmSrc), .RegWrite(RegWrite), .RegSrc(RegSrc), .InstrCode(InstrCode),
+					.Instr(inst), .Flags(Flag_R), .FlagWrite(FlagWrite));
+	Extend ext (.ExtImm(ExtImm),
+				.Instr(inst[23:0]), .ImmSrc(ImmSrc));
+	ALU alu (.ALUResult(ALUResult), .ALUFlags(ALUFlags),
+				.ScrA(SrcA), .ScrB(SrcB), .ALUControl(ALUControl), .InstrCode(InstrCode));
+				
+	wire [3:0] RA1 = (RegSrc == 0 ? inst[19:16] : 4'b1111);
+	wire [3:0] RA2 = (RegSrc == 0 ? inst[3:0] : inst[15:12]);
+	wire [3:0] RA3 = (InstrCode == 3'b111 ? 4'b1110 : inst[15:12]);
+	wire [31:0] WD3 = (InstrCode == 3'b111 ? PCPlus4 : Result);
 	
-	always@(posedge clk) begin
+	RegisterFile rf (.RD1(SrcA), .RD2(D2),
+						.CLK(clk), .A1(RA1), .A2(RA2), .A3(RA3), .R15(PCPlus8), 
+						.WD3(WD3), .WE3(RegWrite));
+
+	assign SrcB = (ALUSrc == 0 ? D2 : ExtImm); //?????RTL strange
+	assign memwrite = MemWrite;
+	assign memaddr = ALUResult;
+	assign writedata = D2;
+	assign Result = (MemtoReg == 0 ? ALUResult : readdata);
+	
+	always@(negedge clk) begin
 		if(reset)
 			begin
-				PC = 32'b0;
+				PC_R = 32'b0;
+				Flag_R = 1'b0;
 			end
-		
-		PCPlus4 = PC + 32'b0000_0000_0000_0000_0000_0000_0000_0100; //pc + 4
-		PCPlus8 = PCPlus4 + 32'b0000_0000_0000_0000_0000_0000_0000_0100; //pc + 8
-		A3_R <= inst[15:12]; 
-		ALUResult_R <= ALUResult;
-		readdata_R <= readdata;
+		else
+			begin
+				if(FlagWrite)
+					begin
+						Flag_R <= ALUFlags;
+					end
 				
-		case(RegSrc) //mux for input A1, A2
-			1'b0:
-				begin
-					A1_R <= inst[19:16];
-					A2_R <= inst[3:0];
-				end
-			1'b1:
-				begin
-					A1_R <= 4'b1111;
-					A2_R <= inst[15:12];
-				end
-			default:; //do nothing
-		endcase
-				
-		case(ALUSrc) //mux for SrcB
-			1'b0:
-				begin
-					SrcB_R <= SrcB;
-				end
-			1'b1:
-				begin
-					SrcB_R <= ExtImm;
-				end
-			default:; //do nothing
-		endcase
-				
-		case(MemtoReg) //mux for result
-			1'b0:
-				begin
-					result_R <= ALUResult_R;
-				end
-			1'b1:
-				begin
-					result_R <= readdata_R;
-				end
-			default:; //do nothing
-		endcase
-		
-		case(PCSrc)
-			1'b0:
-				begin
-					PC <= PCPlus4; //
-				end
-			1'b1:
-				begin
-					PC <= result_R;
-				end
-			default:
-				PC <= PCPlus4; //do nothing
-		endcase
+				PC_R <= (PCSrc == 1 ? PCPlus4 : Result);
+			end
 	end
 	
 endmodule
