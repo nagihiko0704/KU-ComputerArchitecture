@@ -13,7 +13,7 @@ module ControlUnit(
 	output ALUSrc;
 	output [1:0] ImmSrc;
 	output RegWrite;
-	output RegSrc;
+	output [1:0] RegSrc;
 	output [2:0] InstrCode;
 	output reg FlagWrite;
 	
@@ -32,7 +32,7 @@ module ControlUnit(
 	reg ALUSrc_R;
 	reg [1:0] ImmSrc_R;
 	reg RegWirte_R;
-	reg RegSrc_R;
+	reg [1:0] RegSrc_R;
 	reg [2:0] InstrCode_R; //ADD 000 SUB 001 MOV 010 CMP 011 STR 100 LDR 101 B 110 BL 111
 
 	
@@ -45,6 +45,9 @@ module ControlUnit(
 		Zbit <= Flags;
 		
 		OpCode <= Instr[24:21];
+		
+		ImmSrc_R <= 3;
+		PCSrc_R <= 0;
 		
 		if (Cond == 4'b1110
 			|| (Cond == 4'b0000 && Zbit == 1'b1)
@@ -63,9 +66,9 @@ module ControlUnit(
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
-										RegSrc_R <= 1'b0;
+										RegSrc_R <= 2'b0;
 										InstrCode_R <= 3'b000;
-										FlagWrite <= (Instr[20] == 0 ? 1'b1 : 1'b0);
+										FlagWrite <= (Instr[20] == 1 ? 1'b1 : 1'b0);
 									end
 								4'b0010: //SUB
 									begin
@@ -76,22 +79,22 @@ module ControlUnit(
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
-										RegSrc_R <= 1'b0;
+										RegSrc_R <= 2'b0;
 										InstrCode_R <= 3'b001;
-										FlagWrite <= (Instr[20] == 0 ? 1'b1 : 1'b0);
+										FlagWrite <= (Instr[20] == 1 ? 1'b1 : 1'b0);
 										end
 								4'b1101: //MOV
 									begin
-										PCSrc_R <= 1'b0;
+										PCSrc_R <= (Instr[15:12] == 4'b1111 ? 1'b1 : 1'b0);
 										MemtoReg_R <= 1'b0;
 										MemWrite_R <= 1'b0;
 										ALUControl_R <= 1'b0;
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b1;
-										RegSrc_R <= 1'b0;
+										RegSrc_R <= 2'b0;
 										InstrCode_R <= 3'b010;
-										FlagWrite <= (Instr[20] == 0 ? 1'b1 : 1'b0);
+										FlagWrite <= (Instr[20] == 1 ? 1'b1 : 1'b0);
 									end
 								4'b1010: //CMP
 									begin
@@ -102,7 +105,7 @@ module ControlUnit(
 										ALUSrc_R <= (Instr[25] == 0 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 0 ? 2'b00 : 2'b01);
 										RegWirte_R <= 1'b0;
-										RegSrc_R <= 1'b0;
+										RegSrc_R <= 2'b0;
 										InstrCode_R <= 3'b011;
 										FlagWrite <= 1'b1;
 									end
@@ -121,19 +124,20 @@ module ControlUnit(
 										ALUSrc_R <= (Instr[25] == 1 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 1 ? 2'b00 : 2'b10);
 										RegWirte_R <= 1'b0;
-										RegSrc_R <= 1'b0;
+										RegSrc_R[0] <= 1'b0;
+										RegSrc_R[1] <= 1'b1;
 										InstrCode_R <= 3'b100;
 									end
 								1'b1: //LDR
 									begin
-										PCSrc_R <= 1'b0;
+										PCSrc_R <= (Instr[15:12] == 4'b1111 ? 1'b1 : 1'b0);
 										MemtoReg_R <= 1'b1;
 										MemWrite_R <= 1'b0;
 										ALUControl_R <= (Instr[23] == 0 ? 1'b1 : 1'b0);
 										ALUSrc_R <= (Instr[25] == 1 ? 1'b0 : 1'b1);
 										ImmSrc_R <= (Instr[25] == 1 ? 2'b00 : 2'b10);
 										RegWirte_R <= 1'b1;
-										RegSrc_R <= 1'b0;
+										RegSrc_R <= 2'b0;
 										InstrCode_R <= 3'b101;
 									end
 								default:; //do nothing
@@ -151,7 +155,7 @@ module ControlUnit(
 										ALUSrc_R <= 1'b1;
 										ImmSrc_R <= 2'b11;
 										RegWirte_R <= 1'b0;
-										RegSrc_R <= 1'b1;
+										RegSrc_R <= 2'b11;
 										InstrCode_R <= 3'b110;
 									end
 								1'b1: //BL
@@ -163,7 +167,7 @@ module ControlUnit(
 										ALUSrc_R <= 1'b1;
 										ImmSrc_R <= 2'b11;
 										RegWirte_R <= 1'b0;
-										RegSrc_R <= 1'b1;
+										RegSrc_R <= 2'b11;
 										InstrCode_R <= 3'b111;
 									end
 								default:; //do nothing

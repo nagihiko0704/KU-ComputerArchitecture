@@ -1,6 +1,6 @@
 module RegisterFile(
 	RD1, RD2,
-	CLK, A1, A2, A3, R15, WD3, WE3
+	CLK, A1, A2, A3, R15, WD3, WE3, InstrCode
 	);
 	
 	input CLK;
@@ -10,6 +10,7 @@ module RegisterFile(
 	input [31:0] R15;
 	input [31:0] WD3;
 	input WE3;
+	input [2:0] InstrCode;
 	
 	output [31:0] RD1;
 	output [31:0] RD2;
@@ -20,10 +21,16 @@ module RegisterFile(
 	assign RD2 = (A2 == 4'b1111 ? R15 : register[A2]);
 	
 	always@(negedge CLK) begin
-		if(WE3)
+		if(WE3 && A3 != 15)
 			begin
 				register[A3] <= WD3;
-				
 			end
+			
+		if(InstrCode == 3'b111)//BL
+			begin
+				register[14] <= R15 - 4;
+			end
+		register[15] <= R15;
+		
 	end
 endmodule

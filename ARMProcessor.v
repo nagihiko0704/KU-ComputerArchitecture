@@ -17,7 +17,7 @@ module armreduced(
 	wire [31:0] SrcA;
 	wire [31:0] D2;
 	wire [31:0] ExtImm;
-	wire RegSrc;
+	wire [1:0] RegSrc;
 	wire [1:0] ImmSrc;
 	wire MemWrite;
 	wire [31:0] SrcB;
@@ -31,7 +31,7 @@ module armreduced(
 	wire [31:0] ALUResult;
 	wire [2:0] InstrCode;
 	
-	reg Flag_R = 1'b0;
+	reg Flag_R;
 	reg [31:0] PC_R;
 	
 	wire [31:0] PCPlus4 = PC_R + 4;
@@ -47,20 +47,20 @@ module armreduced(
 	ALU alu (.ALUResult(ALUResult), .ALUFlags(ALUFlags),
 				.ScrA(SrcA), .ScrB(SrcB), .ALUControl(ALUControl), .InstrCode(InstrCode));
 				
-	wire [3:0] RA1 = (RegSrc == 0 ? inst[19:16] : 4'b1111);
-	wire [3:0] RA2 = (RegSrc == 0 ? inst[3:0] : inst[15:12]);
+	wire [3:0] RA1 = (RegSrc[0] == 0 ? inst[19:16] : 4'b1111);
+	wire [3:0] RA2 = (RegSrc[1] == 0 ? inst[3:0] : inst[15:12]);
 	wire [3:0] RA3 = (InstrCode == 3'b111 ? 4'b1110 : inst[15:12]);
 	wire [31:0] WD3 = (InstrCode == 3'b111 ? PCPlus4 : Result);
 	
 	RegisterFile rf (.RD1(SrcA), .RD2(D2),
 						.CLK(clk), .A1(RA1), .A2(RA2), .A3(RA3), .R15(PCPlus8), 
-						.WD3(WD3), .WE3(RegWrite));
+						.WD3(WD3), .WE3(RegWrite), .InstrCode(InstrCode));
 
 	assign SrcB = (ALUSrc == 0 ? D2 : ExtImm); //?????RTL strange
 	assign memwrite = MemWrite;
 	assign memaddr = ALUResult;
 	assign writedata = D2;
-	assign Result = (MemtoReg == 0 ? ALUResult : readdata);
+	assign Result = (MemtoReg == 0) ? ALUResult : readdata;
 	
 	always@(negedge clk) begin
 		if(reset)
